@@ -21,6 +21,8 @@ Apps Scriptエディタでウェブアプリとしてデプロイし、Webhook�
 
 ## メール送信ルール
 
+前提: `agent.id` が `430` の場合にのみ送信処理を行います。それ以外の `agent.id` は処理をスキップし、メールは送信されません。
+
 4つのパターンでメール送信を制御：
 
 1. **`shokureki`が"未提出" + `goalStatus`が"achieved"** → 標準テンプレート（`emailContents.md`）

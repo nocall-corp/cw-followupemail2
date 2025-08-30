@@ -15,31 +15,16 @@ const CONFIG = {
   emailSubject: '【ご面談の件について】（クラウドワークステック事務局）'
 };
 
-// 設定のログ出力
-console.log('=== CONFIG LOADED ===');
-console.log('CONFIG:', JSON.stringify(CONFIG, null, 2));
+//
 
 /**
  * Webhook受信処理のエントリーポイント
  */
 function doPost(e) {
   try {
-    console.log('=== WEBHOOK RECEIVED ===');
-    console.log('Raw webhook data:', e.postData.contents);
-    console.log('Webhook timestamp:', new Date().toISOString());
-    
     const payload = JSON.parse(e.postData.contents);
-    console.log('Parsed payload:', JSON.stringify(payload, null, 2));
     
     if (!isValidPayload(payload)) {
-      console.error('Invalid payload received - validation failed');
-      console.log('Payload validation details:');
-      console.log('- payload exists:', !!payload);
-      console.log('- callStatus:', payload?.callStatus);
-      console.log('- endUser exists:', !!payload?.endUser);
-      console.log('- attributions exists:', !!payload?.endUser?.attributions);
-      console.log('- メールアドレス exists:', !!payload?.endUser?.attributions?.['メールアドレス']);
-      console.log('- conversation exists:', !!payload?.conversation);
       
       return ContentService.createTextOutput(JSON.stringify({
         status: 'error',
@@ -47,7 +32,6 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
     
-    console.log('Payload validation passed - processing webhook');
     processWebhook(payload);
     
     return ContentService.createTextOutput(JSON.stringify({
@@ -56,8 +40,6 @@ function doPost(e) {
     })).setMimeType(ContentService.MimeType.JSON);
     
   } catch (error) {
-    console.error('Error processing webhook:', error);
-    console.error('Error stack:', error.stack);
     return ContentService.createTextOutput(JSON.stringify({
       status: 'error',
       message: error.toString()
@@ -82,41 +64,31 @@ function isValidPayload(payload) {
  */
 function processWebhook(payload) {
   try {
-    console.log('=== PROCESSING WEBHOOK ===');
-    
     const endUser = payload.endUser;
     const conversation = payload.conversation;
     const attributions = endUser.attributions;
-    
-    console.log('EndUser data:', JSON.stringify(endUser, null, 2));
-    console.log('Conversation data:', JSON.stringify(conversation, null, 2));
-    console.log('Attributions data:', JSON.stringify(attributions, null, 2));
+    const agent = payload.agent || {};
     
     // 必要な情報を取得
     const userEmail = attributions['メールアドレス'];
     const userName = attributions['名'] || 'お客様';
     const goalStatus = conversation.goalStatus;
     const goalResult = conversation.goalResult || '';
+    const agentId = agent.id;
+    const agentName = agent.name;
     
-    console.log('=== EXTRACTED DATA ===');
-    console.log('User email:', userEmail);
-    console.log('User name:', userName);
-    console.log('Goal status:', goalStatus);
-    console.log('Goal result:', goalResult);
+    // agent.id が 430 以外はメール送信処理をスキップ
+    if (agentId !== 430) {
+      return;
+    }
     
     // fujiwara@gmail.comへのメール送信をブロック
     if (userEmail && userEmail.toLowerCase().includes('fujiwara@gmail.com')) {
-      console.log('=== FUJIWARA EMAIL BLOCKED ===');
-      console.log('Email to fujiwara@gmail.com is blocked - no email will be sent');
       return;
     }
     
     // shokureki（職歴提出状況）の判定
     const shokureki = determineShokurekiStatus(attributions);
-    console.log('Shokureki status:', shokureki);
-    
-    console.log(`=== DECISION LOGIC ===`);
-    console.log(`Processing email for ${userName}: shokureki=${shokureki}, goalStatus=${goalStatus}`);
     
     // 4パターンのメール送信制御
     let shouldSendEmail = false;
@@ -125,34 +97,23 @@ function processWebhook(payload) {
     if (shokureki === '未提出' && goalStatus === 'achieved') {
       shouldSendEmail = true;
       templateType = 'standard';
-      console.log('Decision: 未提出 + 目標達成 → standard template');
     } else if (shokureki === '未提出' && goalStatus !== 'achieved') {
       shouldSendEmail = true;
       templateType = 'unsubmitted';
-      console.log('Decision: 未提出 + 目標未達成 → unsubmitted template');
     } else if (shokureki === '提出済み' && goalStatus === 'achieved') {
       shouldSendEmail = true;
       templateType = 'submitted';
-      console.log('Decision: 提出済み + 目標達成 → submitted template');
     } else if (shokureki === '提出済み' && goalStatus !== 'achieved') {
       shouldSendEmail = false;
-      console.log('Decision: 提出済み + 目標未達成 → NO EMAIL SENT');
     }
     
-    console.log(`Final decision: shouldSendEmail=${shouldSendEmail}, templateType=${templateType}`);
     
     if (shouldSendEmail) {
-      console.log(`=== SENDING EMAIL ===`);
-      console.log(`Target email: ${userEmail}`);
-      console.log(`Template type: ${templateType}`);
       sendFollowUpEmail(userEmail, userName, goalResult, templateType);
     } else {
-      console.log('=== NO EMAIL SENT ===');
     }
     
   } catch (error) {
-    console.error('Error in processWebhook:', error);
-    console.error('Error stack:', error.stack);
     throw error;
   }
 }
@@ -163,29 +124,19 @@ function processWebhook(payload) {
  */
 function determineShokurekiStatus(attributions) {
   try {
-    console.log('=== DETERMINING SHOKUREKI STATUS ===');
-    console.log('All attributions keys:', Object.keys(attributions));
-    console.log('Raw shokureki value:', attributions['shokureki']);
-    console.log('Raw shokureki type:', typeof attributions['shokureki']);
     
     const raw = String(attributions['shokureki'] || '').trim();
-    console.log('Processed shokureki value:', `"${raw}"`);
 
     if (/提出済み|済|完了/.test(raw)) {
-      console.log('Shokureki decision: 提出済み (matched pattern)');
       return '提出済み';
     }
     if (/未提出|未/.test(raw)) {
-      console.log('Shokureki decision: 未提出 (matched pattern)');
       return '未提出';
     }
 
     // キーが無い、または判定できなければ未提出
-    console.log('Shokureki decision: 未提出 (default - no pattern match)');
     return '未提出';
   } catch (error) {
-    console.error('Error determining shokureki status:', error);
-    console.error('Error stack:', error.stack);
     return '未提出';
   }
 }
@@ -195,12 +146,6 @@ function determineShokurekiStatus(attributions) {
  */
 function sendFollowUpEmail(userEmail, userName, goalResult, templateType) {
   try {
-    console.log('=== SEND FOLLOW-UP EMAIL ===');
-    console.log('Input parameters:');
-    console.log('- userEmail:', userEmail);
-    console.log('- userName:', userName);
-    console.log('- goalResult:', goalResult);
-    console.log('- templateType:', templateType);
     
     const emailTemplate = getEmailTemplate(templateType);
     const emailBody = replaceTemplatePlaceholders(emailTemplate, userName, goalResult);
@@ -218,16 +163,6 @@ function sendFollowUpEmail(userEmail, userName, goalResult, templateType) {
       subject: subject,
       htmlBody: emailBody.replace(/\n/g, '<br>')
     };
-    
-    console.log('=== EMAIL CONFIGURATION ===');
-    console.log('To:', mailOptions.to);
-    console.log('CC:', mailOptions.cc);
-    console.log('Reply-To:', mailOptions.replyTo);
-    console.log('Subject:', mailOptions.subject);
-    console.log('Sender name:', CONFIG.senderName);
-    console.log('Email body length:', mailOptions.htmlBody.length);
-    
-    console.log('=== SENDING EMAIL VIA GMAIL ===');
     GmailApp.sendEmail(
       userEmail,
       subject,
@@ -239,15 +174,7 @@ function sendFollowUpEmail(userEmail, userName, goalResult, templateType) {
         name: CONFIG.senderName
       }
     );
-    
-    console.log(`=== EMAIL SENT SUCCESSFULLY ===`);
-    console.log(`Follow-up email sent successfully to ${userEmail} using ${templateType} template`);
-    console.log(`Email timestamp: ${new Date().toISOString()}`);
-    
   } catch (error) {
-    console.error('=== EMAIL SENDING ERROR ===');
-    console.error('Error sending email:', error);
-    console.error('Error stack:', error.stack);
     throw error;
   }
 }
@@ -276,7 +203,6 @@ function getEmailTemplate(templateType) {
     return templateContent;
     
   } catch (error) {
-    console.error('Error getting email template:', error);
     throw error;
   }
 }
@@ -375,7 +301,6 @@ MAIL：salesassistant-technology@crowdtech.jp
     return templates[templateName] || '';
     
   } catch (error) {
-    console.error('Error getting template content:', error);
     throw error;
   }
 }
@@ -396,7 +321,6 @@ function replaceTemplatePlaceholders(template, userName, goalResult) {
     return result;
     
   } catch (error) {
-    console.error('Error replacing template placeholders:', error);
     throw error;
   }
 }
@@ -405,8 +329,6 @@ function replaceTemplatePlaceholders(template, userName, goalResult) {
  * テスト用Webhook処理関数
  */
 function testWebhook() {
-  console.log('=== TEST WEBHOOK START ===');
-  
   const testPayload = {
     "id": "call_test_123",
     "timestamp": "2025-01-23T15:45:05.24+09:00",
@@ -432,38 +354,25 @@ function testWebhook() {
       "duration": 300000,
       "goalStatus": "achieved",
       "goalResult": "2025年1月24日(金) 14:00から面談を実施します。"
+    },
+    "agent": {
+      "id": 430,
+      "name": "即時架電"
     }
   };
   
-  try {
-    console.log('Test payload:', JSON.stringify(testPayload, null, 2));
-    processWebhook(testPayload);
-    console.log('=== TEST WEBHOOK COMPLETED SUCCESSFULLY ===');
-  } catch (error) {
-    console.error('=== TEST WEBHOOK FAILED ===');
-    console.error('Test webhook failed:', error);
-    console.error('Error stack:', error.stack);
-  }
+  processWebhook(testPayload);
 }
 
 /**
  * テスト用メール送信関数
  */
 function testSimpleEmail() {
-  try {
-    console.log('=== TEST SIMPLE EMAIL START ===');
-    sendFollowUpEmail(
-      'hayashi@nocall.ai',
-      '林翔吾',
-      '2025年1月24日(金) 14:00から面談を実施します。',
-      'standard'
-    );
-    console.log('=== TEST SIMPLE EMAIL COMPLETED ===');
-    console.log('Test email sent successfully to hayashi@nocall.ai with title: ' + CONFIG.emailSubject);
-  } catch (error) {
-    console.error('=== TEST SIMPLE EMAIL FAILED ===');
-    console.error('Test email failed:', error);
-    console.error('Error stack:', error.stack);
-  }
+  sendFollowUpEmail(
+    'hayashi@nocall.ai',
+    '林翔吾',
+    '2025年1月24日(金) 14:00から面談を実施します。',
+    'standard'
+  );
 }
 
