@@ -223,14 +223,13 @@ function getTemplateContent(templateName) {
 ・所要時間：15分程度
 ・形式：面談
 
-また、より詳細な職歴情報をお伺いして、{user_name}様のご経歴に合う案件をご紹介したく、
-下記リンクより職歴情報のご提出をお願いいたします。
-
+また、より詳細な職歴情報をお伺いし、ご経歴に合う案件をご紹介したく、
+下記リンクよりご希望条件のご登録・職歴情報のご提出をお願いいたします。
 https://tech.crowdworks.jp/login
 
 【ご参考資料】
 ・職務経歴書の雛形
-https://docs.google.com/spreadsheets/d/1MHjrtCri89VyMaXv1aIQiiYnAWBOJvYm/edit?usp=sharing&ouid=100120649335527564769&rtpof=true&sd=true
+https://docs.google.com/spreadsheets/d/1sF9JE7dGY7-6yA6mBKpdrq2QgIXtr6x3xNAZPqppamY/edit?gid=894385822#gid=894385822
 
 何かご不明点がございましたら、お気軽にお問い合わせください。
 
@@ -238,25 +237,22 @@ https://docs.google.com/spreadsheets/d/1MHjrtCri89VyMaXv1aIQiiYnAWBOJvYm/edit?us
 株式会社クラウドワークス
 クラウドワークス エージェント テック本部事務局
 （旧クラウドテック事務局）
-MAIL：salesassistant-technology@crowdtech.jp
+MAIL：career-crowdtech@crowdtech.jp
 
 営業時間：10:00-19:00
 営業日：月～金（土日祝除く）
-※案件のご質問に関しましては順番にお応え致しますので、メールにてご連絡頂けますと幸いです。
-※ご返信をいただく際は、＜全員返信＞をお願いいたします。
 ------------------------------------------------------`,
 
       'emailContentsUnsubmitted': `お世話になっております。クラウドワークステック事務局です。
 先ほどはお電話でのご対応をありがとうございました。
 
-また、より詳細な職歴情報をお伺いして、{user_name}様のご経歴に合う案件をご紹介したく、
-下記リンクより職歴情報のご提出をお願いいたします。
-
+また、より詳細な職歴情報をお伺いし、ご経歴に合う案件をご紹介したく、
+下記リンクよりご希望条件のご登録・職歴情報のご提出をお願いいたします。
 https://tech.crowdworks.jp/login
 
 【ご参考資料】
 ・職務経歴書の雛形
-https://docs.google.com/spreadsheets/d/1MHjrtCri89VyMaXv1aIQiiYnAWBOJvYm/edit?usp=sharing&ouid=100120649335527564769&rtpof=true&sd=true
+https://docs.google.com/spreadsheets/d/1sF9JE7dGY7-6yA6mBKpdrq2QgIXtr6x3xNAZPqppamY/edit?gid=894385822#gid=894385822
 
 何かご不明点がございましたら、お気軽にお問い合わせください。
 
@@ -267,12 +263,10 @@ https://docs.google.com/spreadsheets/d/1MHjrtCri89VyMaXv1aIQiiYnAWBOJvYm/edit?us
 株式会社クラウドワークス
 クラウドワークス エージェント テック本部事務局
 （旧クラウドテック事務局）
-MAIL：salesassistant-technology@crowdtech.jp
+MAIL：career-crowdtech@crowdtech.jp
 
 営業時間：10:00-19:00
 営業日：月～金（土日祝除く）
-※案件のご質問に関しましては順番にお応え致しますので、メールにてご連絡頂けますと幸いです。
-※ご返信をいただく際は、＜全員返信＞をお願いいたします。
 ------------------------------------------------------`,
 
       'emailContentdSubmitted': `お世話になっております。クラウドワークステック事務局です。
@@ -289,12 +283,10 @@ MAIL：salesassistant-technology@crowdtech.jp
 株式会社クラウドワークス
 クラウドワークス エージェント テック本部事務局
 （旧クラウドテック事務局）
-MAIL：salesassistant-technology@crowdtech.jp
+MAIL：career-crowdtech@crowdtech.jp
 
 営業時間：10:00-19:00
 営業日：月～金（土日祝除く）
-※案件のご質問に関しましては順番にお応え致しますので、メールにてご連絡頂けますと幸いです。
-※ご返信をいただく際は、＜全員返信＞をお願いいたします。
 ------------------------------------------------------`
     };
     
